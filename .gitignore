@@ -1,0 +1,17 @@
+# Ignore local Terraform directories (includes plugins and providers)
+.terraform/
+
+# Ignore lock files
+.terraform.lock.hcl
+
+# Ignore all TF state files
+*.tfstate
+*.tfstate.*
+
+# Ignore crash logs
+crash.log
+crash.*.log
+
+# Ignore TF variables files (if they contain secrets)
+*.tfvars
+*.tfvars.json
