@@ -52,4 +52,9 @@ resource "aws_security_group_rule" "bastion_to_eks" {
     
     # Source FIXED: Replaced module.ec2 sideways reference with a single variable string
     source_security_group_id = var.bastion_security_group_id 
+
+    lifecycle {
+        # This rule should be recreated if the EKS cluster's security group changes
+        create_before_destroy = true
+    }
 }

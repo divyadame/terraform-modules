@@ -23,6 +23,10 @@ output "eks_cluster_security_group_id" {
   value       = module.eks.eks_cluster_security_group_id
 }
 
+output "ecr_url" {
+  value = module.ecr.repo_url
+}
+
 output "ssh_connection_command" {
   description = "Command to log into the bastion host."
   value       = "ssh -i ~/.ssh/bastion-key ec2-user@${module.ec2.instance_public_ip}"
@@ -32,3 +36,4 @@ output "kubeconfig_update_command" {
   description = "Command to run inside the bastion host to connect kubectl."
   value       = "aws eks update-kubeconfig --region ${var.region} --name ${module.eks.eks_cluser_name}"
 }
+

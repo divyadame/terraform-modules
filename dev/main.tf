@@ -111,3 +111,7 @@ module "eks" {
     managed_by  = "terraform"
   }
 }
+
+module "ecr" {
+  source    = "../modules/ecr"
+}
