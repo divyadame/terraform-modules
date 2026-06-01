@@ -17,6 +17,7 @@ The deployment architecture is split into two distinct tiers: Global Infrastruct
     ├── vpc/                 # 🌐 Base Networking Fabric
     ├── ec2/                 # 💻 Compute & Bastion Admin Layer
     └── eks/                 # ☸️ Container Control Fabric (EKS Control Plane)
+    |__ ecr/
 ```
 
 _________________________
