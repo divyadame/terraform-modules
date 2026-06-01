@@ -3,17 +3,33 @@ variable "region" {
   default = "ap-south-1"
 }
 
+variable "environment" {
+  type    = string
+  default = "dev"
+}
+
+variable "application" {
+  type    = string
+  default = "petclinic"
+}
+
+# Fetch the tracking identifier for the raw OS base layer image
+data "aws_ssm_parameter" "al2023_ami" {
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"
+}
+
+# ==============================================================================
+# BASE NETWORKING INFRASTRUCTURE
+# ==============================================================================
 module "vpc_module" {
   source = "../modules/vpc"
 
-  # Pass all variables required by your code
   region           = var.region
-  vpc_name         = "my-dev-vpc"
-  igw_name         = "my-dev-igw"
-  route_table_name = "my-dev-public-rt"
+  vpc_name         = "${var.environment}-vpc"
+  igw_name         = "${var.environment}-igw"
+  route_table_name = "${var.environment}-rt"
   cidr_block       = "10.0.0.0/16"
 
-  # Map of subnet name to CIDR block (for your for_each)
   public_subnets = {
     "public-subnet-1a" = "10.0.1.0/24"
     "public-subnet-1b" = "10.0.2.0/24"
@@ -26,14 +42,72 @@ module "vpc_module" {
     "private-subnet-1c" = "10.0.30.0/24"
   }
 
-  # List of zones used by your element() function
   availability_zones = ["ap-south-1a", "ap-south-1b", "ap-south-1c"]
 
-  # Base tags to merge
   tags = {
-    Environment  = "dev"
-    appplication = "petclinic"
-    managed_by   = "terraform"
+    Environment = var.environment
+    application = var.application
+    managed_by  = "terraform"
   }
 }
 
+# ==============================================================================
+# SECURE IDENTITY AUTHENTICATION LAYERS
+# ==============================================================================
+resource "aws_key_pair" "bastion_key" {
+  key_name   = "${var.environment}-${var.application}-bastion-key"
+  public_key = file("~/.ssh/bastion-key.pub") 
+}
+
+# ==============================================================================
+# COMPUTE LAYER: SECURE JUMP BOX ENGINE (EC2)
+# ==============================================================================
+module "ec2" {
+  source = "../modules/ec2"
+
+  region        = var.region
+  ami           = data.aws_ssm_parameter.al2023_ami.value
+  instance_type = "t3.micro"
+  
+  # Pass down network anchors so the module can build its custom security framework
+  vpc_id        = module.vpc_module.vpc_id 
+  subnet_id     = module.vpc_module.public_subnets["public-subnet-1a"] 
+  ssh_key_name  = aws_key_pair.bastion_key.key_name 
+  instance_name = "${var.environment}-${var.application}-bastion-host"
+  
+  # CALIBRATION FIXED: Feeds EKS state values down cleanly to form IAM profiles
+  eks_cluster_arn = module.eks.eks_cluster_arn
+
+  tags = {
+    Environment = var.environment
+    application = var.application
+    managed_by  = "terraform"
+  }
+}
+
+# ==============================================================================
+# ORCHESTRATION LAYER: CONTAINER CONTROL FABRIC (EKS)
+# ==============================================================================
+module "eks" {
+  source = "../modules/eks"
+
+  environment                 = var.environment
+  application                 = var.application
+  public_access               = false
+  node_group_desired_capacity = 2
+  node_group_min_capacity     = 1
+  node_group_max_capacity     = 3
+  node_group_instance_type    = "t3.micro"
+  node_group_ami_type         = "AL2023_x86_64_STANDARD" 
+
+  # CALIBRATION FIXED: Direct module runtime outputs injected as local input arrays
+  vpc_id                    = module.vpc_module.vpc_id
+  private_subnet_ids        = module.vpc_module.private_subnets
+  bastion_security_group_id = module.ec2.instance_security_group_id
+
+  tags = {
+    Environment = var.environment
+    application = var.application
+    managed_by  = "terraform"
+  }
+}
