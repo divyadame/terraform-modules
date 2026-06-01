@@ -4,7 +4,7 @@ This repository orchestrates a production-grade, modular cloud infrastructure on
 ________________________________________
 🧭 System Blueprint & Architecture
 The deployment architecture is split into two distinct tiers: Global Infrastructure Elements and Environment Execution Workspaces.
-text
+```text
 .
 ├── environments/
 │   ├── dev/
@@ -17,8 +17,9 @@ text
     ├── vpc/                 # 🌐 Base Networking Fabric
     ├── ec2/                 # 💻 Compute & Bastion Admin Layer
     └── eks/                 # ☸️ Container Control Fabric (EKS Control Plane)
-Use code with caution.
-________________________________________
+```
+
+_________________________
 🛠️ The Module Framework
 Every core cloud infrastructure component is packaged into a reusable module layout inside the /modules folder:
 •	🌐 Network Fabric (/vpc): Generates public and private subnets across multi-AZ architectures, establishing absolute network isolation.
