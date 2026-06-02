@@ -115,3 +115,27 @@ module "eks" {
 module "ecr" {
   source    = "../modules/ecr"
 }
+
+module "rds" {
+  source = "../modules/rds"
+  db_name              = local.db_username
+  db_username          = local.db_username
+  db_password          = local.db_password
+  environment          = var.environment
+  application          = var.application
+  db_instance_class   = "db.t4g.micro"
+  db_allocated_storage = 20
+  multi_az_flag       = false
+  snapshot_flag       = false
+
+  # CALIBRATION FIXED: Direct module runtime outputs injected as local input arrays
+  vpc_id             = module.vpc_module.vpc_id
+  private_subnet_ids = module.vpc_module.private_subnets
+  eks_node_security_group_id = module.eks.eks_node_security_group_id
+
+  tags = {
+    environment = var.environment
+    application = var.application
+    managed_by  = "terraform"
+  }
+}

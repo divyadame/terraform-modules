@@ -29,3 +29,8 @@ output "eks_cluster_node_group_arn" {
   value       = module.eks.eks_managed_node_groups["eks_nodes"].node_group_arn
 }
 
+output "eks_node_security_group_id" {
+  description = "The security group ID associated with the EKS worker nodes."
+  value       = module.eks.node_security_group_id
+}
+
