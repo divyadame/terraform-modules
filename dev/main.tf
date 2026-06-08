@@ -13,11 +13,43 @@ variable "application" {
   default = "petclinic"
 }
 
+#DB creds
+locals {
+    db_username = "dbadmin"
+    db_password = "!#$%&*()-_=+[]{}<>:?"
+    db_name     = "petclinic-dev-db"
+  }
+
 # Fetch the tracking identifier for the raw OS base layer image
 data "aws_ssm_parameter" "al2023_ami" {
   name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64"
 }
+#Github actions module for OIDC and permissions
+module "githubactions" {
+  source = "../modules/githubactions"
+  githubactionsrole = "${var.environment}-${var.application}-github-actions-ecr-eks-role"
+  github_repo = "divyadame/aws-devops-divya-projects-java-rds"
+}
 
+#ECR module for container registry
+# ECR module for container regidtery
+module "ecr" {
+  source    = "../modules/ecr"
+  environment = var.environment
+  application = var.application
+}
+
+#Secrets manager module to create secrets
+module "secrets-manager" {
+  source  = "../modules/secrets-manager"
+  environment = var.environment
+  application = var.application
+  # PASSING THE LOCALS INTO THE MODULE HERE:
+  db_username = local.db_username
+  db_password = local.db_password
+  db_name     = local.db_name
+
+}
 # ==============================================================================
 # BASE NETWORKING INFRASTRUCTURE
 # ==============================================================================
@@ -71,7 +103,7 @@ module "ec2" {
   
   # Pass down network anchors so the module can build its custom security framework
   vpc_id        = module.vpc_module.vpc_id 
-  subnet_id     = module.vpc_module.public_subnets["public-subnet-1a"] 
+  subnet_id     = module.vpc_module.public_subnets[0] 
   ssh_key_name  = aws_key_pair.bastion_key.key_name 
   instance_name = "${var.environment}-${var.application}-bastion-host"
   
@@ -102,7 +134,8 @@ module "eks" {
 
   # CALIBRATION FIXED: Direct module runtime outputs injected as local input arrays
   vpc_id                    = module.vpc_module.vpc_id
-  private_subnet_ids        = module.vpc_module.private_subnets
+#  private_subnet_ids        = module.vpc_module.private_subnets
+  private_subnet_ids        = module.vpc_module.public_subnets #testing in public
   bastion_security_group_id = module.ec2.instance_security_group_id
 
   tags = {
@@ -112,9 +145,7 @@ module "eks" {
   }
 }
 
-module "ecr" {
-  source    = "../modules/ecr"
-}
+# ===========RDS===============================
 
 module "rds" {
   source = "../modules/rds"
@@ -123,10 +154,12 @@ module "rds" {
   db_password          = local.db_password
   environment          = var.environment
   application          = var.application
-  db_instance_class   = "db.t4g.micro"
+  db_instance_class    = "db.t4g.micro"
   db_allocated_storage = 20
-  multi_az_flag       = false
-  snapshot_flag       = false
+  engine               = "postgres"
+  engine_version       = "16"
+  multi_az_flag        = false
+  snapshot_flag        = true
 
   # CALIBRATION FIXED: Direct module runtime outputs injected as local input arrays
   vpc_id             = module.vpc_module.vpc_id
@@ -139,3 +172,4 @@ module "rds" {
     managed_by  = "terraform"
   }
 }
+

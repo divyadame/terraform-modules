@@ -38,7 +38,7 @@ variable "db_allocated_storage" {
 variable "snapshot_flag" {
   description = "Whether to skip the final snapshot when deleting the RDS instance."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "multi_az_flag" {
@@ -65,5 +65,15 @@ variable "db_password" {
 
 variable "db_name" {
   description = "The name of the initial database to create in the RDS instance, retrieved from Secrets Manager."
+  type        = string
+}
+
+variable "engine" {
+  description = "Select mysql,Postgres engines for your RDS"
+  type        = string
+}
+
+variable "engine_version" {
+  description = "Select Engine Version"
   type        = string
 }

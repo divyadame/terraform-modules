@@ -1,9 +1,25 @@
+#If you want to pull secrets from AWS secrets manager
+# 1. Locate the secret container in AWS
+data "aws_secretsmanager_secret" "rds_secret" {
+    name = "${var.environment}-${var.application}-db-credentials"
 
+}
+
+# 2. Retrieve the secret value (DBname and username and password). 
+#Pull the JSON data string from the container
+data "aws_secretsmanager_secret_version" "rds_creds" {
+    secret_id = data.aws_secretsmanager_secret.rds_secret.id
+}
+
+# 3. Decode the JSON string so Terraform can read individual keys
+locals {
+    db_creds = jsondecode(data.aws_secretsmanager_secret_version.rds_creds.secret_string)
+}
 # 1. Pass the decoded values into your RDS resource block
 resource "aws_db_instance" "rds" {
     identifier              = "${var.environment}-${var.application}-db"
-    engine                  = "postgres"
-    engine_version          = "16.1"
+    engine                  = var.engine
+    engine_version          = var.engine_version
     instance_class          = var.db_instance_class
     allocated_storage       = var.db_allocated_storage
 #  max_allocated_storage   = var.db_max_allocated_storage
@@ -21,24 +37,5 @@ resource "aws_db_instance" "rds" {
             "Name" = "${var.environment}-${var.application}-db"
         }
     )
-
-  
 }
 
-#If you want to pull secrets from AWS secrets manager
-# 1. Locate the secret container in AWS
-# data "aws_secretsmanager_secret" "rds_secret" {
-#     name = "${var.environment}-${var.application}-db-credentials"
-
-# }
-
-# # 2. Retrieve the secret value (username and password). 
-# #Pull the JSON data string from the container
-# data "aws_secretsmanager_secret_version" "rds_creds" {
-#     secret_id = data.aws_secretsmanager_secret.rds_secret.id
-# }
-
-# # 3. Decode the JSON string so Terraform can read individual keys
-# locals {
-#     db_creds = jsondecode(data.aws_secretsmanager_secret_version.rds_creds.secret_string)
-# }

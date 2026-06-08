@@ -9,7 +9,7 @@ output "vpc_id" {
 
 output "public_subnets" {
     description = "Map of tags to public subnet IDs"
-    value       = { for k, v in aws_subnet.public : k => v.id }
+    value       = values({ for k, v in aws_subnet.public : k => v.id })
 }
 
 # FIXED: Outputs a List of strings instead of a Map, matching what EKS expects
@@ -23,7 +23,7 @@ output "route_gateway_id" {
     value       = aws_internet_gateway.main.id
 }
 
-output "nat_gateway_id" {
-    description = "The ID of the NAT Gateway"
-    value       = aws_nat_gateway.main.id
-}
+# output "nat_gateway_id" {
+#     description = "The ID of the NAT Gateway"
+#     value       = aws_nat_gateway.main.id
+# }

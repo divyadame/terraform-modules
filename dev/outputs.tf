@@ -10,7 +10,7 @@ output "bastion_security_group_id" {
 
 output "eks_cluster_name" {
   description = "The exact name of your deployed EKS cluster."
-  value       = module.eks.eks_cluser_name
+  value       = module.eks.eks_cluster_name
 }
 
 output "eks_cluster_endpoint" {
@@ -34,6 +34,10 @@ output "ssh_connection_command" {
 
 output "kubeconfig_update_command" {
   description = "Command to run inside the bastion host to connect kubectl."
-  value       = "aws eks update-kubeconfig --region ${var.region} --name ${module.eks.eks_cluser_name}"
+  value       = "aws eks update-kubeconfig --region ${var.region} --name ${module.eks.eks_cluster_name}"
 }
 
+# output "github_to_aws_role_arn" {
+#     value       = module.githubactions.github_actions_role_arn
+#     description = "Copy this ARN into your GitHub Actions workflow configuration"
+# }
