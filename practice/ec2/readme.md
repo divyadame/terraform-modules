@@ -1,7 +1,8 @@
+You can use this to do below tasks
 # working with datasources
 # create drift and modify state file
 # corrupt state file
-
+# troubleshoot ec2
 
 sudo systemctl status amazon-ssm-agent
 sudo systemctl status sshd

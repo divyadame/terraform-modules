@@ -29,32 +29,32 @@ resource "aws_security_group_rule" "instance_egress" {
     security_group_id = aws_security_group.this.id
 }
 
-# Rule B: Allows SSH from the EICE Gateway Security Group (via Private Network)
-resource "aws_security_group_rule" "eice_ssh" {
-    type                     = "ingress"
-    from_port                = 22
-    to_port                  = 22
-    protocol                 = "tcp"
-    source_security_group_id = aws_security_group.eice_sg.id # Links EICE to Instance
-    security_group_id        = aws_security_group.this.id
+# # Rule B: Allows SSH from the EICE Gateway Security Group (via Private Network)
+# resource "aws_security_group_rule" "eice_ssh" {
+#     type                     = "ingress"
+#     from_port                = 22
+#     to_port                  = 22
+#     protocol                 = "tcp"
+#     source_security_group_id = aws_security_group.eice_sg.id # Links EICE to Instance
+#     security_group_id        = aws_security_group.this.id
+# }
+
+# # 2. SEPARATE Security Group for the EICE Gateway
+# resource "aws_security_group" "eice_sg" {
+#     name        = "eice-gateway-sg"
+#     description = "Control traffic leaving the EICE gateway"
+#     vpc_id      = data.aws_vpc.default.id
 }
 
-# 2. SEPARATE Security Group for the EICE Gateway
-resource "aws_security_group" "eice_sg" {
-    name        = "eice-gateway-sg"
-    description = "Control traffic leaving the EICE gateway"
-    vpc_id      = data.aws_vpc.default.id
-}
-
-# EICE needs an outbound rule to send traffic to your instance subnet
-resource "aws_security_group_rule" "eice_egress" {
-    type              = "egress"
-    from_port         = 22
-    to_port           = 22
-    protocol          = "tcp"
-    cidr_blocks       = [data.aws_vpc.default.cidr_block] # Allows reaching internal resources
-    security_group_id = aws_security_group.eice_sg.id
-}
+# # EICE needs an outbound rule to send traffic to your instance subnet
+# resource "aws_security_group_rule" "eice_egress" {
+#     type              = "egress"
+#     from_port         = 22
+#     to_port           = 22
+#     protocol          = "tcp"
+#     cidr_blocks       = [data.aws_vpc.default.cidr_block] # Allows reaching internal resources
+#     security_group_id = aws_security_group.eice_sg.id
+# }
 
 
 # 4. EC2 Instance Configuration
@@ -68,15 +68,22 @@ resource "aws_instance" "this" {
     tags = {
         managed_by = "terraform"
     }
+    # # 1. Prevents accidental deletion via AWS Console / CLI
+    # disable_api_termination = true 
+
+    # # 2. Keeps your data volume safe even if the server is destroyed
+    # root_block_device {
+    #     delete_on_termination = false 
+    # }
 
 }
 
-# 4. Create the EC2 Instance Connect Endpoint
-resource "aws_ec2_instance_connect_endpoint" "eice" {
-  subnet_id          = data.aws_subnets.this.ids[0]
-  security_group_ids = [aws_security_group.eice_sg.id]
+# # 4. Create the EC2 Instance Connect Endpoint
+# resource "aws_ec2_instance_connect_endpoint" "eice" {
+#   subnet_id          = data.aws_subnets.this.ids[0]
+#   security_group_ids = [aws_security_group.eice_sg.id]
 
-    tags = {
-        managed_by = "terraform"
-    }
-}
+#     tags = {
+#         managed_by = "terraform"
+#     }
+# }
