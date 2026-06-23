@@ -41,11 +41,11 @@ jobs:
           terraform_version: 1.14.9
 
       - name: Terraform Init
-        working-directory: environments/dev
+        working-directory: cicd_wt_terraform/dev
         run: terraform init
 
       - name: Terraform Plan
-        working-directory: environments/dev
+        working-directory: cicd_wt_terraform/dev
         run: terraform plan -no-color
 
   terraform-apply:
@@ -73,9 +73,9 @@ jobs:
           terraform_version: 1.14.9
 
       - name: Terraform Init
-        working-directory: environments/dev
+        working-directory: cicd_wt_terraform/dev
         run: terraform init
 
       - name: Terraform Apply
-        working-directory: environments/dev
+        working-directory: cicd_wt_terraform/dev
         run: terraform apply -auto-approve
