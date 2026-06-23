@@ -1,0 +1,76 @@
+name: "Terraform Dev CI/CD with Approval Gate"
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+
+permissions:
+  id-token: write # Required for AWS OIDC authentication
+  contents: read  # Required to check out code
+
+# Global Environment Variables
+env:
+  github-to-aws-role: "arn:aws:iam::200774433341:role/github_terraform_cicd_role"
+
+jobs:
+  terraform-plan:
+    name: "Dev: Run Plan"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.github-to-aws-role }}
+          aws-region: ap-south-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.9
+
+      - name: Terraform Init
+        working-directory: environments/dev
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: environments/dev
+        run: terraform plan -no-color
+
+  terraform-apply:
+    name: "Dev: Execute Apply"
+    needs: terraform-plan
+    if: github.event_name == 'push' && github.ref_name == 'dev'
+    runs-on: ubuntu-latest
+    
+    # Activates the manual approval gate in GitHub Settings
+    environment: development 
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.github-to-aws-role }}
+          aws-region: ap-south-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.9
+
+      - name: Terraform Init
+        working-directory: environments/dev
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: environments/dev
+        run: terraform apply -auto-approve
