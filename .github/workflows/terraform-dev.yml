@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - dev
+    paths:
+      - 'cicd_wt_terraform/**'
   pull_request:
     branches:
       - dev
+  # CRITICAL: Trigger ONLY when files change inside this specific folder
+    paths:
+      - 'cicd_wt_terraform/**'
 
 permissions:
   id-token: write # Required for AWS OIDC authentication
