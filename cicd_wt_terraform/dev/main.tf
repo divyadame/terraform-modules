@@ -16,7 +16,7 @@ module "ec2_instance" {
         managed_by = "terraform"
         environment = "dev"
     }
-    key_name = var.ssh_public_key
+    ssh_public_key = var.ssh_public_key
 }
 
 module "s3_dev" {

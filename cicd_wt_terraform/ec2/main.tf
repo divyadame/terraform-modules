@@ -1,6 +1,6 @@
 resource "aws_key_pair" "this" {
   key_name   = "ec2_key"
-  public_key = var.ssh_pub_key
+  public_key = var.ssh_public_key
 }
 
 resource "aws_security_group" "this" {
