@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "testBkts" {
 
 resource "aws_s3_bucket_versioning" "testBktVersioing" {
     for_each = var.bucket_config
-    bucket = aws_s3_bucket.testBkts[each.key].name
+    bucket = aws_s3_bucket.testBkts[each.key].id
     versioning_configuration {
         status = "Suspended"
     }
