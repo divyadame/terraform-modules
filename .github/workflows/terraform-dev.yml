@@ -20,7 +20,7 @@ permissions:
 # Global Environment Variables
 env:
   github-to-aws-role: "arn:aws:iam::200774433341:role/github_terraform_cicd_role"
-  ssh_public_key: ${{ var.ssh_pub_key }}
+  ssh_public_key: ${{ vars.ssh_pub_key }}
 jobs:
 
   terraform-plan:
