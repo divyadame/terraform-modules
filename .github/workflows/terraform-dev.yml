@@ -12,7 +12,7 @@ on:
   # CRITICAL: Trigger ONLY when files change inside this specific folder
     paths:
       - 'cicd_wt_terraform/**'
-
+  workflow_dispatch:
 permissions:
   id-token: write # Required for AWS OIDC authentication
   contents: read  # Required to check out code
