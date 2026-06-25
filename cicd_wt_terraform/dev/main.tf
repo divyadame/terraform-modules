@@ -1,4 +1,10 @@
 
+variable "region" {
+    type = string
+    default = "ap-south-1"
+}
+
+
 module "ec2_instance" {
     source = "../ec2"
     instance_type = "t3.micro"

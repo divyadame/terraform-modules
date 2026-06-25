@@ -22,6 +22,20 @@ env:
   github-to-aws-role: "arn:aws:iam::200774433341:role/github_terraform_cicd_role"
 
 jobs:
+  terraform-validate:
+    name: "validate terraform configuration"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with: 
+          terraform-version: 1.14.9
+      - name: Validate terraform configuration
+        working-directory: cicd_wt_terraform/dev
+        run: terraform validate
+        
   terraform-plan:
     name: "Dev: Run Plan"
     runs-on: ubuntu-latest
