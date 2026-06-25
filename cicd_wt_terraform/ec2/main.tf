@@ -1,6 +1,6 @@
 resource "aws_key_pair" "this" {
   key_name   = "ec2_key"
-  public_key = file("~/.ssh/bastion-key.pub")
+  public_key = var.ssh_pub_key
 }
 
 resource "aws_security_group" "this" {
@@ -32,7 +32,7 @@ resource "aws_security_group_rule" "instance_egress" {
 # 4. EC2 Instance Configuration
 resource "aws_instance" "this" {
   ami                    = data.aws_ssm_parameter.al2023_ami.value
-  instance_type          = "t3.micro"
+  instance_type          = var.instance_type
   key_name               = aws_key_pair.this.key_name
   vpc_security_group_ids = [aws_security_group.this.id]
 
@@ -42,8 +42,5 @@ resource "aws_instance" "this" {
   # FIXED: Reference updated to match your IAM profile block name
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
-  tags = {
-    managed_by  = "terraform"
-    environment = "dev"
-  }
+  tags = var.tags
 }

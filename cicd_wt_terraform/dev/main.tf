@@ -4,6 +4,10 @@ variable "region" {
     default = "ap-south-1"
 }
 
+variable "ssh_public_key" {
+    type = string
+}
+
 
 module "ec2_instance" {
     source = "../ec2"
@@ -12,6 +16,7 @@ module "ec2_instance" {
         managed_by = "terraform"
         environment = "dev"
     }
+    key_name = var.ssh_public_key
 }
 
 module "s3_dev" {
