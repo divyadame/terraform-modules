@@ -45,9 +45,14 @@ jobs:
         working-directory: cicd_wt_terraform/dev
         run: terraform init
 
+      - name: Terraform Validate
+        working-directory: cicd_wt_terraform/dev
+        run: terraform validate
+
+
       - name: Terraform Plan
         working-directory: cicd_wt_terraform/dev
-        run: terraform plan -no-color
+        run: terraform plan -no-color -input=false
 
   terraform-apply:
     name: "Dev: Execute Apply"
