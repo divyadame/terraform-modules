@@ -57,7 +57,7 @@ jobs:
   terraform-apply:
     name: "Dev: Execute Apply"
     needs: terraform-plan
-    if: github.event_name == 'push' && github.ref_name == 'dev'
+   # if: github.event_name == 'push' && github.ref_name == 'dev'
     runs-on: ubuntu-latest
     
     # Activates the manual approval gate in GitHub Settings
